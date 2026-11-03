@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Süper Menajer & Maç Simülatörü</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- NAVİGASYON BANNERI -->
+  <header class="top-bar">
+    <div class="logo">⚽ Menajerlik 2026</div>
+    <div id="userStatus" class="user-status">Henüz Takım Seçilmedi</div>
+  </header>
+
+  <main class="app-container">
+    <!-- SEKMELER (TAB NAVIGATION) -->
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="tab-career">🎮 Kariyerim</button>
+      <button class="tab-btn" data-tab="tab-standings">📊 Puan Durumu</button>
+      <button class="tab-btn" data-tab="tab-transfer">⚽ Transfer Pazarı</button>
+      <button class="tab-btn" data-tab="tab-match">🏟️ Maç Ekranı</button>
+    </nav>
+
+    <!-- TAB 1: KARİYER KURULUM VE GENEL BAKIŞ -->
+    <section id="tab-career" class="tab-content active">
+      <div class="card" id="setupCard">
+        <h2>🏆 Yeni Kariyer Başlat</h2>
+        <p class="sub-text">Oynamak istediğin ligi ve yönetmek istediğin takımı seç.</p>
+        <div class="form-group">
+          <label for="leagueSelect">Lig Seç:</label>
+          <select id="leagueSelect"></select>
+        </div>
+        <div class="form-group">
+          <label for="teamSelect">Takım Seç:</label>
+          <select id="teamSelect"></select>
+        </div>
+        <button id="startCareerBtn" class="btn-primary">Kariyeri Başlat 🚀</button>
+      </div>
+
+      <div class="card hidden" id="dashboardCard">
+        <h2>📋 Kulüp Paneli</h2>
+        <div class="dashboard-stats">
+          <div class="stat-box">
+            <span class="label">Takım Gücü</span>
+            <span class="value" id="dashTeamRating">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Bütçe</span>
+            <span class="value" id="dashBudget">0 M€</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Mevcut Hafta</span>
+            <span class="value" id="dashWeek">1</span>
+          </div>
+        </div>
+        
+        <h3>Mevcut Oyuncu Kadrosu</h3>
+        <div class="table-responsive">
+          <table class="data-table" id="squadTable">
+            <thead>
+              <tr><th>İsim</th><th>Mevki</th><th>Güç (OVR)</th><th>Fiyat</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button id="goToMatchBtn" class="btn-primary" style="margin-top:15px;">Sıradaki Maça Git ➔</button>
+      </div>
+    </section>
+
+    <!-- TAB 2: PUAN DURUMU & FİKSTÜR -->
+    <section id="tab-standings" class="tab-content">
+      <div class="card">
+        <h2>📊 Lig Puan Durumu</h2>
+        <div class="table-responsive">
+          <table class="data-table" id="standingsTable">
+            <thead>
+              <tr><th>#</th><th>Takım</th><th>OM</th><th>G</th><th>B</th><th>M</th><th>AG</th><th>YG</th><th>AV</th><th>P</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: TRANSFER PAZARI -->
+    <section id="tab-transfer" class="tab-content">
+      <div class="card">
+        <h2>⚽ Transfer Pazarı</h2>
+        <p class="sub-text">Bütçene uygun oyuncuları transfer ederek takımının gücünü artır!</p>
+        <div class="table-responsive">
+          <table class="data-table" id="transferTable">
+            <thead>
+              <tr><th>Oyuncu</th><th>Eski Takımı</th><th>Mevki</th><th>Güç</th><th>Bonservis</th><th>İşlem</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: MAÇ CANVAS & SİMÜLASYON -->
+    <section id="tab-match" class="tab-content">
+      <div class="card match-header-card">
+        <div class="hdr">
+          <div class="tm"><span id="lA"></span><div><b id="tA">Ev Sahibi</b><small id="sA">⬆ üstte</small></div></div>
+          <div class="mid"><div id="sc">0 : 0</div><div id="clk">0’</div></div>
+          <div class="tm r"><div><b id="tB">Deplasman</b><small id="sB">⬇ altta</small></div><span id="lB"></span></div>
+        </div>
+        <div id="tk">Maçı başlatmak için "Oyna" düğmesine bas</div>
+        <div class="pb">
+          <span id="pa">%50</span>
+          <div class="bar"><div id="ba"></div><div id="bb"></div></div>
+          <span id="pb">%50</span>
+        </div>
+      </div>
+
+      <div id="wrap"><canvas id="cv"></canvas></div>
+
+      <div id="stats"></div>
+
+      <div class="btns">
+        <button id="go" class="btn-primary">▶ Oyna / Devam Et</button>
+        <button id="sp" class="sec">1x</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- MAÇ SONU MODAL -->
+  <div id="end">
+    <div class="box">
+      <div class="hdr">
+        <div class="tm"><span id="eA"></span><div><b id="enA"></b></div></div>
+        <div class="mid"><div class="sc" id="eS">0 : 0</div></div>
+        <div class="tm r"><div><b id="enB"></b></div><span id="eB"></span></div>
+      </div>
+      <div class="res" id="eR">Maç Bitti</div>
+      <div class="mm" id="eSt"></div>
+      <button id="eC" class="btn-primary" style="margin-top:12px;">Haftaya Devam Et ➔</button>
+    </div>
+  </div>
+
+  <canvas id="cf"></canvas>
+
+  <!-- SCRIPT YÜKLEMELERİ -->
+  <script src="js/data.js"></script>
+  <script src="js/matchEngine.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
