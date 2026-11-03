@@ -4,17 +4,149 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Süper Menajer & Maç Simülatörü</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --bg: #0e1410;
+      --card: #18211b;
+      --tx: #f2f5f2;
+      --mu: #9aa89d;
+      --ac: #2ecc71;
+      --sec: #2c3a2f;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--tx);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #171a2e;
+      padding: 10px 16px;
+      font-weight: bold;
+      border-bottom: 2px solid #252a4a;
+    }
+    .user-status { color: var(--ac); font-size: 14px; }
+
+    .app-container {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tabs { display: flex; gap: 4px; background: #121814; padding: 4px; border-radius: 10px; }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 4px;
+      font-size: 12px;
+      background: transparent;
+      color: var(--mu);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tab-btn.active { background: var(--card); color: var(--ac); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .hidden { display: none !important; }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .card h2 { margin-top: 0; font-size: 18px; color: #fff; }
+    .sub-text { font-size: 12px; color: var(--mu); margin-top: -8px; margin-bottom: 14px; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; color: var(--mu); margin-bottom: 4px; }
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--sec);
+      background: #0e1410;
+      color: var(--tx);
+      font-size: 14px;
+    }
+
+    button.btn-primary, button:not(.sec) {
+      width: 100%;
+      padding: 12px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--ac);
+      color: #04210f;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button.sec { background: var(--sec); color: var(--tx); width: auto; }
+    button.btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 6px; }
+
+    .dashboard-stats { display: flex; gap: 8px; margin-bottom: 14px; }
+    .stat-box {
+      flex: 1;
+      background: #0e1410;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-box .label { display: block; font-size: 10px; color: var(--mu); }
+    .stat-box .value { font-size: 16px; font-weight: bold; color: var(--ac); }
+
+    .table-responsive { overflow-x: auto; margin-top: 6px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    .data-table th { background: #111713; color: var(--mu); padding: 8px; border-bottom: 1px solid var(--sec); }
+    .data-table td { padding: 8px; border-bottom: 1px solid #202b23; }
+    .data-table tr.my-team { background: rgba(46, 204, 113, 0.15); font-weight: bold; }
+
+    .match-header-card { padding: 8px; }
+    .hdr { display: flex; align-items: center; gap: 6px; background: #171a2e; border-radius: 10px; padding: 6px 8px; }
+    .tm { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+    .tm.r { justify-content: flex-end; text-align: right; }
+    .tm b { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tm small { font-size: 10px; color: var(--mu); }
+    .mid { text-align: center; flex: none; }
+    #sc { font-size: 22px; font-weight: 800; }
+    #clk { font-size: 11px; font-weight: 700; color: var(--ac); }
+    #tk { font-size: 11px; color: var(--mu); text-align: center; margin: 4px 0; height: 16px; overflow: hidden; }
+
+    #wrap { position: relative; width: 100%; height: 360px; margin: 6px 0; }
+    #cv { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 10px; }
+
+    .pb { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--mu); }
+    .bar { flex: 1; height: 8px; border-radius: 4px; overflow: hidden; display: flex; background: #222; }
+    .bar div { height: 100%; transition: width 0.3s; }
+
+    .btns { display: flex; gap: 6px; margin-top: 6px; }
+
+    #end { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+    #end.show { display: flex; }
+    #end .box { background: var(--card); border-radius: 14px; width: 100%; max-width: 380px; padding: 16px; text-align: center; }
+  </style>
 </head>
 <body>
-  <!-- NAVİGASYON BANNERI -->
   <header class="top-bar">
     <div class="logo">⚽ Menajerlik 2026</div>
     <div id="userStatus" class="user-status">Henüz Takım Seçilmedi</div>
   </header>
 
   <main class="app-container">
-    <!-- SEKMELER (TAB NAVIGATION) -->
     <nav class="tabs">
       <button class="tab-btn active" data-tab="tab-career">🎮 Kariyerim</button>
       <button class="tab-btn" data-tab="tab-standings">📊 Puan Durumu</button>
@@ -22,7 +154,6 @@
       <button class="tab-btn" data-tab="tab-match">🏟️ Maç Ekranı</button>
     </nav>
 
-    <!-- TAB 1: KARİYER KURULUM VE GENEL BAKIŞ -->
     <section id="tab-career" class="tab-content active">
       <div class="card" id="setupCard">
         <h2>🏆 Yeni Kariyer Başlat</h2>
@@ -68,7 +199,6 @@
       </div>
     </section>
 
-    <!-- TAB 2: PUAN DURUMU & FİKSTÜR -->
     <section id="tab-standings" class="tab-content">
       <div class="card">
         <h2>📊 Lig Puan Durumu</h2>
@@ -83,7 +213,6 @@
       </div>
     </section>
 
-    <!-- TAB 3: TRANSFER PAZARI -->
     <section id="tab-transfer" class="tab-content">
       <div class="card">
         <h2>⚽ Transfer Pazarı</h2>
@@ -99,13 +228,12 @@
       </div>
     </section>
 
-    <!-- TAB 4: MAÇ CANVAS & SİMÜLASYON -->
     <section id="tab-match" class="tab-content">
       <div class="card match-header-card">
         <div class="hdr">
-          <div class="tm"><span id="lA"></span><div><b id="tA">Ev Sahibi</b><small id="sA">⬆ üstte</small></div></div>
+          <div class="tm"><div><b id="tA">Ev Sahibi</b></div></div>
           <div class="mid"><div id="sc">0 : 0</div><div id="clk">0’</div></div>
-          <div class="tm r"><div><b id="tB">Deplasman</b><small id="sB">⬇ altta</small></div><span id="lB"></span></div>
+          <div class="tm r"><div><b id="tB">Deplasman</b></div></div>
         </div>
         <div id="tk">Maçı başlatmak için "Oyna" düğmesine bas</div>
         <div class="pb">
@@ -117,8 +245,6 @@
 
       <div id="wrap"><canvas id="cv"></canvas></div>
 
-      <div id="stats"></div>
-
       <div class="btns">
         <button id="go" class="btn-primary">▶ Oyna / Devam Et</button>
         <button id="sp" class="sec">1x</button>
@@ -126,25 +252,380 @@
     </section>
   </main>
 
-  <!-- MAÇ SONU MODAL -->
   <div id="end">
     <div class="box">
       <div class="hdr">
-        <div class="tm"><span id="eA"></span><div><b id="enA"></b></div></div>
+        <div class="tm"><div><b id="enA"></b></div></div>
         <div class="mid"><div class="sc" id="eS">0 : 0</div></div>
-        <div class="tm r"><div><b id="enB"></b></div><span id="eB"></span></div>
+        <div class="tm r"><div><b id="enB"></b></div></div>
       </div>
-      <div class="res" id="eR">Maç Bitti</div>
-      <div class="mm" id="eSt"></div>
-      <button id="eC" class="btn-primary" style="margin-top:12px;">Haftaya Devam Et ➔</button>
+      <div class="res" id="eR" style="margin:15px 0; font-weight:bold; font-size:18px;">Maç Bitti</div>
+      <button id="eC" class="btn-primary">Haftaya Devam Et ➔</button>
     </div>
   </div>
 
-  <canvas id="cf"></canvas>
+  <script>
+    const LEAGUES_DATA = {
+      superlig: {
+        name: "Süper Lig (Türkiye)",
+        teams: [
+          { id: "gs", name: "Galatasaray", rating: 80, budget: 50, color: "#a90429", squad: [
+            { name: "Victor Osimhen", pos: "ST", rating: 87, price: 70 },
+            { name: "Mauro Icardi", pos: "ST", rating: 82, price: 20 },
+            { name: "Lucas Torreira", pos: "CDM", rating: 81, price: 18 }
+          ]},
+          { id: "fb", name: "Fenerbahçe", rating: 79, budget: 48, color: "#002d62", squad: [
+            { name: "Youssef En-Nesyri", pos: "ST", rating: 81, price: 22 },
+            { name: "Fred", pos: "CM", rating: 80, price: 15 },
+            { name: "Sebastian Szymanski", pos: "CAM", rating: 80, price: 16 }
+          ]},
+          { id: "bjk", name: "Beşiktaş", rating: 77, budget: 35, color: "#ffffff", squad: [
+            { name: "Ciro Immobile", pos: "ST", rating: 81, price: 12 },
+            { name: "Rafa Silva", pos: "CAM", rating: 82, price: 18 }
+          ]},
+          { id: "ts", name: "Trabzonspor", rating: 75, budget: 25, color: "#800020", squad: [
+            { name: "Simon Banza", pos: "ST", rating: 78, price: 10 }
+          ]}
+        ]
+      },
+      premier: {
+        name: "Premier League (İngiltere)",
+        teams: [
+          { id: "mci", name: "Manchester City", rating: 86, budget: 150, color: "#6cabdd", squad: [{ name: "Erling Haaland", pos: "ST", rating: 91, price: 120 }] },
+          { id: "ars", name: "Arsenal", rating: 84, budget: 110, color: "#ef0107", squad: [{ name: "Bukayo Saka", pos: "RW", rating: 87, price: 80 }] },
+          { id: "liv", name: "Liverpool", rating: 85, budget: 120, color: "#c8102e", squad: [{ name: "Mohamed Salah", pos: "RW", rating: 89, price: 70 }] }
+        ]
+      },
+      laliga: {
+        name: "La Liga (İspanya)",
+        teams: [
+          { id: "rma", name: "Real Madrid", rating: 87, budget: 160, color: "#febe10", squad: [{ name: "Kylian Mbappé", pos: "ST", rating: 91, price: 140 }] },
+          { id: "bar", name: "Barcelona", rating: 85, budget: 90, color: "#004d98", squad: [{ name: "Lamine Yamal", pos: "RW", rating: 86, price: 90 }] }
+        ]
+      },
+      seriea: {
+        name: "Serie A (İtalya)",
+        teams: [
+          { id: "int", name: "Inter", rating: 84, budget: 85, color: "#0053a0", squad: [{ name: "Lautaro Martinez", pos: "ST", rating: 88, price: 75 }] },
+          { id: "juv", name: "Juventus", rating: 82, budget: 75, color: "#ffffff", squad: [{ name: "Dusan Vlahovic", pos: "ST", rating: 84, price: 50 }] }
+        ]
+      },
+      bundesliga: {
+        name: "Bundesliga (Almanya)",
+        teams: [
+          { id: "bay", name: "Bayern München", rating: 86, budget: 140, color: "#dc052d", squad: [{ name: "Harry Kane", pos: "ST", rating: 90, price: 85 }] },
+          { id: "bvb", name: "Borussia Dortmund", rating: 81, budget: 65, color: "#fde100", squad: [{ name: "Julian Brandt", pos: "CAM", rating: 83, price: 35 }] }
+        ]
+      }
+    };
 
-  <!-- SCRIPT YÜKLEMELERİ -->
-  <script src="js/data.js"></script>
-  <script src="js/matchEngine.js"></script>
-  <script src="js/game.js"></script>
+    const $ = id => document.getElementById(id);
+    let cv = null, ctx = null, W = 360, H = 360, st = null, raf = null, speed = 1;
+    const SPEEDS = [1, 2, 3, 5];
+
+    let gameState = {
+      leagueKey: null,
+      myTeamId: null,
+      week: 1,
+      standings: [],
+      schedule: [],
+      myTeam: null
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      cv = $('cv');
+      ctx = cv.getContext('2d');
+      initTabs();
+      populateLeagueSelect();
+
+      $('leagueSelect').addEventListener('change', populateTeamSelect);
+      $('startCareerBtn').addEventListener('click', startCareer);
+      $('goToMatchBtn').addEventListener('click', () => switchTab('tab-match'));
+      $('go').addEventListener('click', playCurrentMatch);
+      $('eC').addEventListener('click', () => {
+        $('end').classList.remove('show');
+        advanceWeek();
+      });
+      $('sp').addEventListener('click', () => {
+        speed = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length];
+        $('sp').textContent = speed + 'x';
+      });
+    });
+
+    function initTabs() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const targetBtn = document.querySelector(`[data-tab="${tabId}"]`);
+      if (targetBtn) targetBtn.classList.add('active');
+      $(tabId).classList.add('active');
+    }
+
+    function populateLeagueSelect() {
+      const sel = $('leagueSelect');
+      sel.innerHTML = '';
+      Object.keys(LEAGUES_DATA).forEach(key => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = LEAGUES_DATA[key].name;
+        sel.appendChild(opt);
+      });
+      populateTeamSelect();
+    }
+
+    function populateTeamSelect() {
+      const lKey = $('leagueSelect').value;
+      const sel = $('teamSelect');
+      sel.innerHTML = '';
+      if (!lKey || !LEAGUES_DATA[lKey]) return;
+      LEAGUES_DATA[lKey].teams.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.name} (Güç: ${t.rating})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function startCareer() {
+      gameState.leagueKey = $('leagueSelect').value;
+      gameState.myTeamId = $('teamSelect').value;
+      const league = LEAGUES_DATA[gameState.leagueKey];
+
+      gameState.myTeam = JSON.parse(JSON.stringify(league.teams.find(t => t.id === gameState.myTeamId)));
+      gameState.standings = league.teams.map(t => ({
+        id: t.id, name: t.name, rating: t.rating, color: t.color,
+        played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
+      }));
+
+      generateSchedule(league.teams);
+      $('setupCard').classList.add('hidden');
+      $('dashboardCard').classList.remove('hidden');
+      $('userStatus').textContent = `${gameState.myTeam.name} Menajeri`;
+
+      updateDashboard();
+      renderStandings();
+      renderTransferMarket();
+    }
+
+    function generateSchedule(teams) {
+      gameState.schedule = [];
+      const list = [...teams];
+      if (list.length % 2 !== 0) list.push({ id: 'dummy', name: 'BAY' });
+
+      for (let w = 0; w < (list.length - 1) * 2; w++) {
+        const weekMatches = [];
+        for (let i = 0; i < list.length / 2; i++) {
+          const t1 = list[i], t2 = list[list.length - 1 - i];
+          if (t1.id !== 'dummy' && t2.id !== 'dummy') {
+            weekMatches.push(w % 2 === 0 ? { home: t1, away: t2 } : { home: t2, away: t1 });
+          }
+        }
+        gameState.schedule.push(weekMatches);
+        list.splice(1, 0, list.pop());
+      }
+    }
+
+    function updateDashboard() {
+      $('dashTeamRating').textContent = gameState.myTeam.rating;
+      $('dashBudget').textContent = gameState.myTeam.budget + " M€";
+      $('dashWeek').textContent = gameState.week;
+
+      const tbody = document.querySelector('#squadTable tbody');
+      tbody.innerHTML = '';
+      (gameState.myTeam.squad || []).forEach(p => {
+        tbody.innerHTML += `<tr><td><b>${p.name}</b></td><td>${p.pos}</td><td><span style="color:var(--ac)">${p.rating}</span></td><td>${p.price} M€</td></tr>`;
+      });
+    }
+
+    function renderStandings() {
+      gameState.standings.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+      const tbody = document.querySelector('#standingsTable tbody');
+      tbody.innerHTML = '';
+      gameState.standings.forEach((t, i) => {
+        const isMe = t.id === gameState.myTeamId ? 'class="my-team"' : '';
+        tbody.innerHTML += `<tr ${isMe}><td>${i + 1}</td><td>${t.name}</td><td>${t.played}</td><td>${t.won}</td><td>${t.drawn}</td><td>${t.lost}</td><td>${t.gf}</td><td>${t.ga}</td><td>${t.gd}</td><td><b>${t.pts}</b></td></tr>`;
+      });
+    }
+
+    function renderTransferMarket() {
+      const tbody = document.querySelector('#transferTable tbody');
+      tbody.innerHTML = '';
+      const league = LEAGUES_DATA[gameState.leagueKey];
+
+      league.teams.filter(t => t.id !== gameState.myTeamId).forEach(t => {
+        (t.squad || []).forEach(p => {
+          tbody.innerHTML += `
+            <tr>
+              <td><b>${p.name}</b></td>
+              <td>${t.name}</td>
+              <td>${p.pos}</td>
+              <td>${p.rating}</td>
+              <td>${p.price} M€</td>
+              <td><button class="btn-primary btn-sm" onclick="buyPlayer('${p.name}', ${p.rating}, ${p.price})">Satın Al</button></td>
+            </tr>`;
+        });
+      });
+    }
+
+    window.buyPlayer = function(name, rating, price) {
+      if (gameState.myTeam.budget < price) {
+        alert("Yetersiz Bütçe!");
+        return;
+      }
+      gameState.myTeam.budget -= price;
+      gameState.myTeam.squad.push({ name, pos: "TRF", rating, price });
+      gameState.myTeam.rating = Math.round(gameState.myTeam.rating + 1);
+      const std = gameState.standings.find(s => s.id === gameState.myTeamId);
+      if (std) std.rating = gameState.myTeam.rating;
+
+      alert(`${name} transfer edildi! Takım gücün arttı.`);
+      updateDashboard();
+      renderTransferMarket();
+    };
+
+    function calculateOddsFromRatings(ratingA, ratingB) {
+      const diff = ratingA - ratingB;
+      const baseProbA = 1 / (1 + Math.pow(10, -diff / 15));
+      let probA = baseProbA * 0.85;
+      let probB = (1 - baseProbA) * 0.85;
+      let probD = 0.30 - Math.abs(probA - probB) * 0.2;
+      const norm = probA + probB + probD;
+      return { pa: probA / norm, pb: probB / norm };
+    }
+
+    function startEngineMatch(teamA, teamB, onComplete) {
+      fitCanvas();
+      const odds = calculateOddsFromRatings(teamA.rating, teamB.rating);
+      st = {
+        teamAData: teamA, teamBData: teamB, min: 0, s: { A: 0, B: 0 },
+        over: false, i: 0, sched: [10, 25, 40, 60, 75, 85], onComplete: onComplete, odds: odds
+      };
+
+      $('tA').textContent = teamA.name;
+      $('tB').textContent = teamB.name;
+      $('pa').textContent = '%' + Math.round(odds.pa * 100);
+      $('pb').textContent = '%' + Math.round(odds.pb * 100);
+      $('ba').style.width = (odds.pa * 100) + '%';
+      $('bb').style.width = (odds.pb * 100) + '%';
+      $('ba').style.background = teamA.color || '#2ecc71';
+      $('bb').style.background = teamB.color || '#e74c3c';
+      $('sc').textContent = '0 : 0';
+      $('clk').textContent = '0’';
+
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(engineLoop);
+    }
+
+    function fitCanvas() {
+      if (!cv || !$('wrap')) return;
+      const r = $('wrap').getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1);
+      cv.width = Math.max(1, Math.round(r.width * d));
+      cv.height = Math.max(1, Math.round(r.height * d));
+      ctx.setTransform(d, 0, 0, d, 0, 0);
+      W = r.width; H = r.height;
+    }
+
+    function engineLoop() {
+      if (!st) return;
+      if (!st.over) {
+        st.min += 0.4 * speed;
+        const nx = st.sched[st.i];
+        if (nx !== undefined && st.min >= nx) {
+          st.i++;
+          const isA = Math.random() < st.odds.pa;
+          if (Math.random() < 0.4) {
+            if (isA) st.s.A++; else st.s.B++;
+            $('sc').textContent = st.s.A + ' : ' + st.s.B;
+            $('tk').textContent = Math.floor(st.min) + '’ GOL! (' + (isA ? st.teamAData.name : st.teamBData.name) + ')';
+          } else {
+            $('tk').textContent = Math.floor(st.min) + '’ Tehlikeli Atak!';
+          }
+        }
+        if (st.min >= 90) {
+          st.min = 90;
+          st.over = true;
+          finishEngineMatch();
+        }
+      }
+
+      $('clk').textContent = Math.floor(st.min) + '’';
+      drawScene();
+      if (!st.over) raf = requestAnimationFrame(engineLoop);
+    }
+
+    function drawScene() {
+      if (!ctx) return;
+      ctx.fillStyle = '#2e8b3a'; ctx.fillRect(0, 0, W, H);
+      for (let i = 1; i < 14; i += 2) {
+        ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(0, i * H / 14, W, H / 14);
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,.65)'; ctx.lineWidth = 2.5;
+      ctx.strokeRect(3, 3, W - 6, H - 6);
+      ctx.beginPath(); ctx.moveTo(3, H / 2); ctx.lineTo(W - 3, H / 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(W / 2, H / 2, W * .14, 0, 7); ctx.stroke();
+    }
+
+    function finishEngineMatch() {
+      $('tk').textContent = 'Maç Bitti!';
+      $('enA').textContent = st.teamAData.name;
+      $('enB').textContent = st.teamBData.name;
+      $('eS').textContent = st.s.A + ' : ' + st.s.B;
+      
+      let resText = "Berabere Bitti!";
+      if (st.s.A > st.s.B) resText = "🏆 " + st.teamAData.name + " Kazandı!";
+      else if (st.s.B > st.s.A) resText = "🏆 " + st.teamBData.name + " Kazandı!";
+      
+      $('eR').textContent = resText;
+      $('end').classList.add('show');
+
+      if (st.onComplete) st.onComplete(st.s.A, st.s.B);
+    }
+
+    function playCurrentMatch() {
+      const matches = gameState.schedule[gameState.week - 1];
+      if (!matches) {
+        alert("Sezon Bitti!");
+        return;
+      }
+
+      const myMatch = matches.find(m => m.home.id === gameState.myTeamId || m.away.id === gameState.myTeamId);
+      const homeTeam = gameState.standings.find(s => s.id === myMatch.home.id);
+      const awayTeam = gameState.standings.find(s => s.id === myMatch.away.id);
+
+      startEngineMatch(homeTeam, awayTeam, (scoreA, scoreB) => {
+        matches.forEach(m => {
+          const h = gameState.standings.find(s => s.id === m.home.id);
+          const a = gameState.standings.find(s => s.id === m.away.id);
+          let sA = scoreA, sB = scoreB;
+
+          if (m !== myMatch) {
+            const diff = h.rating - a.rating;
+            sA = Math.max(0, Math.floor(Math.random() * 3 + (diff > 0 ? 1 : 0)));
+            sB = Math.max(0, Math.floor(Math.random() * 3 + (diff < 0 ? 1 : 0)));
+          }
+
+          h.played++; a.played++;
+          h.gf += sA; h.ga += sB; h.gd = h.gf - h.ga;
+          a.gf += sB; a.ga += sA; a.gd = a.gf - a.ga;
+
+          if (sA > sB) { h.won++; h.pts += 3; a.lost++; }
+          else if (sB > sA) { a.won++; a.pts += 3; h.lost++; }
+          else { h.drawn++; a.drawn++; h.pts += 1; a.pts += 1; }
+        });
+        renderStandings();
+      });
+    }
+
+    function advanceWeek() {
+      gameState.week++;
+      updateDashboard();
+      switchTab('tab-career');
+    }
+  </script>
 </body>
 </html>
